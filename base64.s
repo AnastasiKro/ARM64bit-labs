@@ -18,10 +18,7 @@ base:
 	.equ	blen, .-base
 dict:
 	.string "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-filename:
-	.ascii "file"
 	.equ flen, 4
-//	.equ	fd2, 32
 	.text
 	.align 2
 	.global _start
@@ -92,8 +89,6 @@ work:
 	blt	L1
 	mov	x29, sp
 	str	x0, [x29, fd1]
-	//adr	x18, base
-	//str	x18, [sp, #16]
 	add	x1, x29, buf1
 	mov	x2, #72
 	mov	x8, #63
@@ -149,7 +144,6 @@ check:
 2:
 	cmp	x4, blen
 	beq	L3
-	//cbz	w20, L3
 	b 	L0
 	
 L0:
@@ -159,7 +153,6 @@ L0:
 	bge	createfilename
 	lsr	x1, x11, #2
 	uxtw	x1, w1
-	//add	x10, x10, #1
 	add	x14, x14, #1
 	lsl	x2, x11, #4
 	lsl	x7, x1, #6
@@ -174,7 +167,6 @@ L0:
 	lsl	x7, x7, #4
 	sub 	x3, x12, x7
 	lsl	x3, x3, #2
-	//add	x10, x10, #1
 	add	x14, x14, #1
 	cmp 	x14, x19
 	bge	1f
@@ -201,8 +193,6 @@ L1:
 	b 	L6
 L3:
 	mov	x21, #1
-	//add	x10, x14, buf1
-	//ldrb	w0, [sp, x10]
 	mov	x1, #1
 	cmp	x14, x19
 	bge	createfname2
@@ -217,8 +207,6 @@ L3:
 	cmp	x14, x19
 	bge	createfname2
 0:	
-	//add	x10, x14, buf1
-	//ldrb	w0, [sp, x10]
 	ldrb	w7, [x15, x8]
 	cmp	w0, w17
 	beq	7f
@@ -290,7 +278,6 @@ L3:
 	add	x1, x1, x2 //got 1
 	add	x5, x5, #1
 	strb	w1, [x29, x9]
-	//add	x5, x5, #1
 	b 	createfname2
 L4:
 	strb	w1, [x29, x9]
@@ -377,13 +364,6 @@ createfname2:
 	strb	wzr, [x1, x2]
 	b	openfile
 openfile:
-//	mov	w3, #0
-//	strb	w3, [x1]
-//	mov	x8, #57
-//	ldr	x0, [sp, fd1]
-//	svc	#0
-//	cmp 	x0, #0
-//	blt	L1
 	mov	x0, #-100
 	ldr	x1, [x29, fname]
 	mov	x2, #0xc1
@@ -395,8 +375,6 @@ openfile:
 	str	x0, [sp, fd2]
 	b writefile
 writefile:
-//	str	x0, [sp, fd2]
-//	ldp 	x29, x30,[sp]
 	ldr	x0, [sp, fd2]
 	add	x1, sp, buf2
 	mov	x2, x5
@@ -406,14 +384,9 @@ writefile:
 	blt	L1
 	mov	x6, #1
 	b 	continue
-//	ldr	x0, [sp, fd2]
-//	mov	x8, #57
-//	svc	#0
 	
 L6:
-	//str	x0, [sp, fd2]
 	ldp 	x29, x30,[sp]
-//	ldr	x0, [sp, fd2]
 	ldr	x0, [sp, fd1]
 	mov	x8, #57
 	svc	#0
