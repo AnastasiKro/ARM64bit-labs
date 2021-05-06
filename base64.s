@@ -103,8 +103,26 @@ work:
 	mov 	x9, buf2
 	mov 	x5, #0
 	mov	x14, #0
-//	mov	x21, #0
+	mov	x21, #0
+	mov	x6, #0
 	b 	check
+continue:
+	ldr	x0, [x29, fd1]
+	add	x1, x29, buf1
+	mov	x2, #72
+	mov	x8, #63
+	svc	#0
+	cbz	x0, L6
+	cmp	x0, #0
+	blt	L1
+	mov	x19, x0
+	mov	x5, #0
+	mov	x14, #0
+	mov	x9, buf2
+	cmp	x21, #1
+	beq	L3
+	b	L0
+
 check:
 	adr	x18, base
 	ldrb	w20, [x18]
@@ -179,9 +197,10 @@ L0:
 	add	x5, x5, #4
 	b 	L2
 L1:
-	bl	 writeerr
+	bl	writeerr
 	b 	L6
 L3:
+	mov	x21, #1
 	//add	x10, x14, buf1
 	//ldrb	w0, [sp, x10]
 	mov	x1, #1
@@ -282,29 +301,29 @@ L4:
 	add	x9, x9, #1
 	b L3	
 L2:
-	ldrsb	w6, [x15, x1]
-	strb	w6, [x29, x9]
+	ldrsb	w7, [x15, x1]
+	strb	w7, [x29, x9]
 	add	x9, x9, #1
-	ldrsb	w6, [x15, x2]
-	strb	w6, [x29, x9]
+	ldrsb	w7, [x15, x2]
+	strb	w7, [x29, x9]
 	add	x9, x9, #1
 	cbz	x3, 0f
-	ldrsb	w6, [x15, x3]
-	strb	w6, [x29, x9]
+	ldrsb	w7, [x15, x3]
+	strb	w7, [x29, x9]
 	add	x9, x9, #1
 	cbz	x4, 1f
-	ldrsb	w6, [x15, x4]
-	strb	w6, [x29, x9]
+	ldrsb	w7, [x15, x4]
+	strb	w7, [x29, x9]
 	add	x9, x9, #1
 	b L0
 
 0:
 	cbz	x4, 2f
-	ldrsb	w6, [x15, x3]
-	strb	w6, [x29, x9]
+	ldrsb	w7, [x15, x3]
+	strb	w7, [x29, x9]
 	add	x9, x9, #1
-	ldrsb	w6, [x15, x4]
-	strb	w6, [x29, x9]
+	ldrsb	w7, [x15, x4]
+	strb	w7, [x29, x9]
 	add	x9, x9, #1
 	b L0
 2:
@@ -317,6 +336,8 @@ L2:
 	add	x9, x9, #1
 	b 	createfilename
 createfilename:	
+	cmp	x6, #1
+	beq	writefile
 	ldr	x1, [sp, #16]
 	mov	x2, #0
 3:	
@@ -338,8 +359,10 @@ createfilename:
 	b	5b
 6:
 	strb	wzr, [x1]
-	b	writefile
+	b	openfile
 createfname2:
+	cmp	x6, #1
+	beq	writefile
 	adr	x18, base
 	ldrb	w18, [x18]
 	ldr	x1, [sp, fname]
@@ -352,15 +375,15 @@ createfname2:
 	b 	0b
 1:
 	strb	wzr, [x1, x2]
-	b	writefile
-writefile:
+	b	openfile
+openfile:
 //	mov	w3, #0
 //	strb	w3, [x1]
-	mov	x8, #57
-	ldr	x0, [sp, fd1]
-	svc	#0
-	cmp 	x0, #0
-	blt	L1
+//	mov	x8, #57
+//	ldr	x0, [sp, fd1]
+//	svc	#0
+//	cmp 	x0, #0
+//	blt	L1
 	mov	x0, #-100
 	ldr	x1, [x29, fname]
 	mov	x2, #0xc1
@@ -370,7 +393,10 @@ writefile:
 	cmp	x0, #0
 	blt	L1
 	str	x0, [sp, fd2]
-	ldp 	x29, x30,[sp]
+	b writefile
+writefile:
+//	str	x0, [sp, fd2]
+//	ldp 	x29, x30,[sp]
 	ldr	x0, [sp, fd2]
 	add	x1, sp, buf2
 	mov	x2, x5
@@ -378,11 +404,22 @@ writefile:
 	svc	#0
 	cmp	x0, #0
 	blt	L1
+	mov	x6, #1
+	b 	continue
+//	ldr	x0, [sp, fd2]
+//	mov	x8, #57
+//	svc	#0
+	
+L6:
+	//str	x0, [sp, fd2]
+	ldp 	x29, x30,[sp]
+//	ldr	x0, [sp, fd2]
+	ldr	x0, [sp, fd1]
+	mov	x8, #57
+	svc	#0
 	ldr	x0, [sp, fd2]
 	mov	x8, #57
 	svc	#0
-	
-L6:
 	ldp	x29, x30, [sp]
 	mov	x16, #5028
 	add	sp, sp, x16
