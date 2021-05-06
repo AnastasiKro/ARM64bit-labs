@@ -434,4 +434,5 @@ writeerr:
 	ret
 	.size writeerr, .-writeerr
 	
-	
+	//aarch64-linux-gnu-as -o base64.o -g base64.s
+	//aarch64-linux-gnu-ld -o base64 -g base64.o
